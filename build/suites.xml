@@ -1,0 +1,22 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="HelloSeleniumSuites" verbose="1">
+
+	<test name="TextSearch">
+		<packages>
+			<package name="com.chofman.helloselenium.tests.search.text" />
+		</packages>
+	</test>
+	
+	<test name="ImageSearch">
+		<packages>
+			<package name="com.chofman.helloselenium.tests.search.image" />
+		</packages>
+	</test>
+	
+	<test name="Persistence">
+		<packages>
+			<package name="com.chofman.helloselenium.tests.persistence" />
+		</packages>
+	</test>
+	
+</suite>

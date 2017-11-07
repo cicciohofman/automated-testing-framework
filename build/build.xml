@@ -1,0 +1,66 @@
+<project name="HelloSelenium" default="build-check" xmlns:ivy="antlib:org.apache.ivy.ant">
+	
+	<property name="java.src.dir" location="../../IdahoFarmBureauFramework/src" />
+	<property name="config.local.file" value="${java.src.dir}/config-local.properties" />
+	<property name="config.regression.file" value="${java.src.dir}/config-regression.properties" />
+	<property name="config.hibernate.file" value="${java.src.dir}/hibernate.cfg.testlocal-systemdata.xml" />
+	<property name="original.libs.dir" location="../libs" />
+	<property name="ivy.file" value="../build/ivy.xml" />
+	<property name="build.src.dir" location="ant-build-run/bin" />
+	<property name="build.libs.dir" location="ant-build-run/libs" />
+	<property name="build.results.dir" location="ant-build-run/testng-results" />
+	
+	<path id="build.libs.classpath">
+		<fileset dir="${build.libs.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<path id="build.combined.classpath">
+		<path refid="build.libs.classpath" />
+	</path>
+	
+	<target name="setup" description="Setup the build directories and copy over base libs">
+		<delete dir="ant-build-run" />
+		<mkdir dir="ant-build-run" />
+		
+		<mkdir dir="${build.results.dir}" />
+		<mkdir dir="${build.libs.dir}" />
+		<mkdir dir="${build.src.dir}" />
+		
+		<copy todir="${build.libs.dir}">
+			<fileset dir="${original.libs.dir}" />
+		</copy>
+	</target>
+
+	<target name="resolve-ivy" depends="setup" description="Resolve dependencies with ivy">
+		<ivy:resolve file="${ivy.file}"/>
+		<ivy:retrieve pattern="${build.libs.dir}/[conf]/[artifact]-[type]-[revision].[ext]" />
+	</target>
+
+	<target name="compile-class-files" depends="resolve-ivy" description="Compile the source code into .class files">
+		<javac srcdir="${java.src.dir}" destdir="${build.src.dir}" classpathref="build.combined.classpath" includeantruntime="no" />		
+		
+		<copy file="${config.hibernate.file}" todir="${build.src.dir}"/>
+	</target>
+
+	<target name="distribute-jar-file" depends="compile-class-files" description="Build the .jar file based on .class files">
+		<jar jarfile="${build.libs.dir}/HelloSelenium.jar" basedir="${build.src.dir}" />
+	</target>
+
+	<target name="build-check" depends="distribute-jar-file" description="Build the project and verify all is well" />
+
+	<target name="run-tests" depends="build-check" description="Run all tests with TestNG suites file">		
+		<taskdef name="testng" classpathref="build.libs.classpath" classname="org.testng.TestNGAntTask" />
+		
+		<copy file="${config.regression.file}" todir="${build.src.dir}" />
+		<move file="${build.src.dir}/config-regression.properties" tofile="${build.src.dir}/config-local.properties"/>
+		
+		<echo message="Running Tests..." />
+		<testng classpathref="build.combined.classpath" outputDir="${build.results.dir}" haltOnfailure="false">
+			<classpath location="${build.src.dir}" />
+			<xmlfileset dir="../build" includes="suites.xml" />
+		</testng>
+	</target>
+	
+</project>
