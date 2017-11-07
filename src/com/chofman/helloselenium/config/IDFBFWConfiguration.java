@@ -38,7 +38,7 @@ public class IDFBFWConfiguration extends DriverImplementation {
 			}
 		}
 		
-		loadImplementation(browserToUse, useEmbeddedDriver, urlToUse, null, null, 0);
+		loadImplementation(browserToUse, useEmbeddedDriver, urlToUse, null, null, null, 0);
 	}
 
 }
